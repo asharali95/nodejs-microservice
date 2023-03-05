@@ -1,0 +1,11 @@
+{
+    "server": {
+      "port": 4001
+    },
+    "database": {
+      "host": "localhost",
+      "port": 27017,
+      "name": "auth-service-test"
+    }
+  }
+  

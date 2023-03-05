@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  auth-service:
+    build:
+      context: ./services/authService
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003" #local:container
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/authService:/usr/src/app
+      - ./services/authService/config/development.json:/usr/src/app/config/development.json
+      - ./services/authService/config/test.json:/usr/src/app/config/test.json
+      - ./services/authService/config/production.json:/usr/src/app/config/production.json
+    networks:
+      - microservices-network
+
+  api-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" #local:container
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./gateway:/usr/src/app
+      - ./gateway/config/development.json:/usr/src/app/config/development.json
+      - ./gateway/config/test.json:/usr/src/app/config/test.json
+      - ./gateway/config/production.json:/usr/src/app/config/production.json
+    networks:
+      - microservices-network
+
+  service-registry:
+    build:
+      context: ./service-registry
+      dockerfile: Dockerfile
+    image: registry:2
+    ports:
+      - "3001:3001" #local:container
+    environment:
+      - REGISTRY_HTTP_SECRET=secret123
+    networks:
+      - microservices-network
+
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002" #local:container
+    environment:
+      - NODE_ENV=development
+      - SERVICE_REGISTRY_URL=http://localhost:3001
+    volumes:
+      - ./service-discovery:/usr/src/app
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+   driver: bridge
